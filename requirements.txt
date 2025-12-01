@@ -1,0 +1,22 @@
+# requirements file
+
+azure-cosmos
+azure-storage-file-datalake
+azure-identity
+msal
+rich
+langgraph
+langgraph-prebuilt
+pymssql
+sqlalchemy
+pyarrow
+fastparquet
+polars
+dask
+pyodbc
+python-dotenv
+openai
+tabulate
+langchain-openai
+langchain-community
+langchain
