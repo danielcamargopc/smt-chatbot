@@ -38,7 +38,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 #         )
 
 
-
 @app.route(route="chatbot_request")
 def chatbot_request(req: func.HttpRequest) -> func.HttpResponse:
 
@@ -48,4 +47,5 @@ def chatbot_request(req: func.HttpRequest) -> func.HttpResponse:
 
     ChatbotAiMessageId_output = str (ChatbotAiMessageId_output)
 
-    return func.HttpResponse( ChatbotAiMessageId_output , status_code=200)
+    return func.HttpResponse( ChatbotAiMessageId_output , status_code = 200)
+
