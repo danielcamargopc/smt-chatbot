@@ -1,22 +1,24 @@
-# requirements file
+# Uncomment to enable Azure Monitor OpenTelemetry
+# Ref: aka.ms/functions-azure-monitor-python
+# azure-monitor-opentelemetry
 
-azure-cosmos
-azure-storage-file-datalake
-azure-identity
-msal
-rich
-langgraph
-langgraph-prebuilt
-pymssql
-sqlalchemy
-pyarrow
-fastparquet
-polars
-dask
-pyodbc
-python-dotenv
-openai
-tabulate
-langchain-openai
-langchain-community
+
+azure-functions
+# langgraph
+
 langchain
+# langchain-community
+# langchain-core
+langchain-openai
+
+langchain_community
+
+sqlalchemy
+
+pyodbc
+
+# test
+# pandas
+# plotly
+# nbformat
+# ipywidgets

@@ -33,7 +33,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 
 
 #### &&&& DEBUG ####
-print ("debug START")
+# print ("debug START")
 
 
 connection_url = URL.create(
@@ -98,7 +98,8 @@ dbw = SQLDatabase.from_uri( connection_url_w )
 
 class CompleteResponse(BaseModel):
     main_msg: str = Field(description="MARKDOWN with a response for the user prompt")
-    internal_msg: str = Field(description= "\"DB_CHANGED\" if any change has been done to the database and \"NO_CHANGES\" if no changes have been made to the database")
+    internal_msg_db_changed: str = Field(description= "\"DB_CHANGED\" if any change has been done to the database and \"NO_CHANGES\" if no changes have been made to the database")
+    internal_msg_blocked_operation: str = Field(description= "\"BLOCKED_OPERATION\" if the user ask for any activity listed in BLOCKED_OPERATION section definition")
 
 
 parser = PydanticOutputParser(pydantic_object=CompleteResponse)
@@ -162,6 +163,7 @@ When building SQL queries:
 
 system_prompt = """You are a helpful assistant.
 
+The response must be a well formatted JSON.
 
 You must respond in the following JSON format:
 {format_instructions_placeholder}
@@ -515,14 +517,26 @@ def smt_chatbot_request ( r_json ):
 
     ai_response = response.get("messages")[-1].content
 
-
-    # print ("# - " * 10 + "\n", ai_response, "\n" + "# - " * 10)
+    #### &&&& DEBUG ####
+    # print ("#-" * 10 + "\n", ai_response, "\n" + "#-" * 10)
 
 
     try:
         response_dic = json.loads(ai_response)
-        if response_dic.get("internal_msg") == "DB_CHANGED":
-            ai_internal_messge = "DB_CHANGED"
+        
+        ai_internal_messge = list()
+
+        if response_dic.get("internal_msg_db_changed") == "DB_CHANGED":
+            ai_internal_messge.append(response_dic.get("internal_msg_db_changed"))
+
+        if response_dic.get("internal_msg_blocked_operation") == "BLOCKED_OPERATION":
+            ai_internal_messge.append(response_dic.get("internal_msg_blocked_operation"))
+
+        ai_internal_messge = [i for i in ai_internal_messge if not i is None]
+        ai_internal_messge = "|".join(ai_internal_messge)
+        
+        if ai_internal_messge == "":
+            ai_internal_messge = None
 
         ai_response = response_dic.get("main_msg")
         #### &&&& DEBUG ####
@@ -582,38 +596,39 @@ def smt_chatbot_request ( r_json ):
 
 
 #### &&&& DEBUG ####
-print ("debug END")
+# print ("debug END")
 
 
 
 #### &&&& DEBUG SECTION START ####
-inp = {"user_prompt":"increase all the estimates of July of 2026 by 1 million"
-       ,"conversation_id":"ac2b67fd-2de0-4478-8c00-405d3fdecea9"
-       ,"scenario_id":"f4ce8d39-bdd4-412d-acb0-c89c67de7c17"
-       ,"user_id":"daniel.cruz@vida.vic.gov.au"
-       ,"user_name": "Daniel Cruz (VIDA)"
-       }
+# inp = {"user_prompt":"increase all the estimates of July of 2026 by 1 million"
+#        ,"conversation_id":"ac2b67fd-2de0-4478-8c00-405d3fdecea9"
+#        ,"scenario_id":"f4ce8d39-bdd4-412d-acb0-c89c67de7c17"
+#        ,"user_id":"daniel.cruz@vida.vic.gov.au"
+#        ,"user_name": "Daniel Cruz (VIDA)"
+#        }
 
+# inp = {"user_prompt":"increase estimates of 2020 by 50%"
+#        ,"conversation_id":"fb36a9fc-8f92-4dca-b5d1-aaad0145dc17"
+#        ,"scenario_id":"f4ce8d39-bdd4-412d-acb0-c89c67de7c17"
+#        ,"user_id":"daniel.cruz@vida.vic.gov.au"
+#        ,"user_name":"Daniel Cruz (VIDA)"
+#       }
 
-inp = {"user_prompt":"increase estimates of 2020 by 50%"
-       ,"conversation_id":"fb36a9fc-8f92-4dca-b5d1-aaad0145dc17"
-       ,"scenario_id":"f4ce8d39-bdd4-412d-acb0-c89c67de7c17"
-       ,"user_id":"daniel.cruz@vida.vic.gov.au"
-       ,"user_name":"Daniel Cruz (VIDA)"
-      }
+# inp = {"user_prompt":"test only"
+#        ,"conversation_id":"a7f2301b-6a9a-4ad7-86fd-4f31983daad8"
+#        ,"scenario_id":"896dd45b-0f1e-4e34-ad13-044d2b0d759f"
+#        ,"user_id":"daniel.cruz@vida.vic.gov.au"
+#        ,"user_name":"Daniel Cruz (VIDA)"
+#        }
 
-inp = {"user_prompt":"shif the estimates of the plug test 6 months lanter"
-       ,"conversation_id":"759d299c-e05e-4c64-b633-3a6a17669950"
-       ,"scenario_id":"1ea5babf-d246-4ba0-a405-d1f12dfcc38c"
-       ,"user_id":"daniel.cruz@vida.vic.gov.au"
-       ,"user_name":"Daniel Cruz (VIDA)"
-      }
+# inp = {"scenario_id"    :"896dd45b-0f1e-4e34-ad13-044d2b0d759f",
+#        "user_id"        :"daniel.cruz@vida.vic.gov.au",
+#        "user_name"      :"Daniel Cruz (VIDA)",
+#        "conversation_id":"90486056-efee-4ad8-b07d-6cb9f97528f1",
+#        "user_prompt"    :"increase estimates of plug test by 21%"}
 
+# out = smt_chatbot_request(inp)
 
-
-out = smt_chatbot_request(inp)
-
-print (out)
+# print (out)
 #### &&&& DEBUG SECTION END ####
-
-
